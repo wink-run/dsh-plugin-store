@@ -1,7 +1,7 @@
 # DSH 插件商店 · DeepSeek Harness Plugin Store
 
-一个类似 [mcp.so](https://mcp.so) 的 DeepSeek Harness 社区插件目录主页。
-抓取 GitHub [`dsh-plugin`](https://github.com/topics/dsh-plugin) 话题下的全部公开仓库，整理成可浏览、可搜索、可一键复制安装命令的静态商店页面。
+DeepSeek Harness 社区插件目录主页。
+整理全网可浏览、可搜索、可一键复制安装命令的静态商店页面。
 
 ## 快速开始
 
