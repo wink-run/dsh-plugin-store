@@ -95,7 +95,7 @@ docker exec dsh-store nginx -t   # 容器内校验 nginx 配置
 
 | 文件 | 说明 |
 | --- | --- |
-| `data/plugins.json` | 插件目录（990 个仓库的整理结果） |
+| `data/plugins.json` | 插件目录（1080 个仓库的整理结果） |
 | `scripts/build_data.py` | 数据构建脚本：抓取、分类、安装命令、README 摘要、精选标记 |
 | `.github/workflows/update-plugins.yml` | 每 6 小时自动抓取并提交新数据 |
 | `assets/css/` `assets/js/` | 页面样式与应用脚本 |
@@ -124,8 +124,8 @@ REPO_CACHE=/tmp/fresh_repos.json README_DIR=/tmp/fresh_readmes python3 scripts/b
 
 默认统计（当前快照）：
 
-- 插件总数：990
-- 社区 Stars：40,867+（不含 deepseek-harness 核心仓库本身）
+- 插件总数：1080
+- 社区 Stars：41,952+（不含 deepseek-harness 核心仓库本身）
 - 数据更新：抓取当日（GitHub Search API，`topic:dsh-plugin`）
 
 ## 安全提示

@@ -4,15 +4,16 @@
 Build data/plugins.json for the DSH plugin store.
 
 Sources:
-  - GitHub search API for the `dsh-plugin` topic (866 repos), cached in
-    /tmp/dsh_all_repos.json by the fetch step.
+  - GitHub search API for the `dsh-plugin` topic. The topic can exceed the
+    API's 1000-results-per-query cap, so the fetch splits the created-date
+    range recursively until every bucket fits, then merges and dedupes.
   - The curated awesome-dsh-plugin list for its category taxonomy and
     high-quality one-line descriptions.
   - Per-plugin install commands curated from each README.
 
 Output: data/plugins.json  (flat array of plugin records)
 """
-import json, os, re, sys, time, urllib.error, urllib.request
+import datetime, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -42,37 +43,84 @@ def _cache_path(p):
         os.makedirs(d, exist_ok=True)
     return p
 
-def fetch_repos():
-    """Return every dsh-plugin topic repo (list of dicts), fetching from the
-    GitHub search API when no local cache exists."""
-    if os.path.exists(REPO_CACHE):
-        print("repos: using local cache", REPO_CACHE)
-        return json.load(open(REPO_CACHE))
-    page, items = 1, []
-    while True:
-        url = ("https://api.github.com/search/repositories"
-               "?q=topic:dsh-plugin&sort=stars&order=desc"
-               f"&per_page=100&page={page}")
+def _search_repos(query, page=1):
+    """One search API call. Throttles to stay under the per-minute search
+    rate limit (30/min with a token, 10/min without) and backs off on 429."""
+    q = urllib.parse.quote(query)
+    url = ("https://api.github.com/search/repositories?q=" + q +
+           "&sort=stars&order=desc&per_page=100&page=" + str(page))
+    delay = 2.0 if GITHUB_TOKEN else 6.0
+    time.sleep(delay)
+    backoff = 5
+    for attempt in range(6):
         try:
             with urllib.request.urlopen(_gh_request(url), timeout=30) as resp:
-                data = json.load(resp)
+                return json.load(resp)
         except urllib.error.HTTPError as e:
+            if e.code in (403, 429):
+                print(f"  rate limited ({e.code}), backing off {backoff}s")
+                time.sleep(backoff)
+                backoff = min(60, backoff * 2)
+                continue
             body = e.read().decode("utf-8", "replace")[:400]
             sys.exit(f"GitHub search API error {e.code}: {body}")
         except Exception as e:
             sys.exit(f"GitHub search API request failed: {e}")
-        total = data.get("total_count", 0)
+    sys.exit("GitHub search API: still rate limited after retries")
+
+def _collect_range(start, end, items, seen):
+    """Fetch every dsh-plugin repo created within [start..end] (ISO dates).
+
+    GitHub caps search results at 1000 per query (paging past it returns
+    422), so when a bucket reports more than 1000 results the date range is
+    split in half and each half is collected recursively. Buckets at or
+    under the cap are paged normally. Dedupes into items/seen."""
+    q = f"topic:dsh-plugin created:{start}..{end}"
+    data = _search_repos(q, 1)
+    total = data.get("total_count", 0)
+    batch = data.get("items", [])
+    if total > 1000 and start != end:
+        s = datetime.date.fromisoformat(start)
+        e = datetime.date.fromisoformat(end)
+        mid = s + (e - s) // 2
+        print(f"  {total} repos in {start}..{end} -> split at {mid}")
+        _collect_range(start, mid.isoformat(), items, seen)
+        _collect_range((mid + datetime.timedelta(days=1)).isoformat(), end, items, seen)
+        return
+    for r in batch:
+        fn = r["full_name"]
+        if fn not in seen:
+            seen.add(fn)
+            items.append(r)
+    print(f"  {start}..{end}: page 1 +{len(batch)} ({total} total)")
+    page = 2
+    while len(batch) == 100 and page <= 10:
+        data = _search_repos(q, page)
         batch = data.get("items", [])
-        items.extend(batch)
-        print(f"  page {page}: {len(batch)} repos (total {total})")
-        if not batch or len(items) >= total:
-            break
+        for r in batch:
+            fn = r["full_name"]
+            if fn not in seen:
+                seen.add(fn)
+                items.append(r)
+        print(f"  {start}..{end}: page {page} +{len(batch)}")
         page += 1
-        if page > 50:  # safety valve
-            break
-        time.sleep(0.3)
+
+def fetch_repos():
+    """Return every dsh-plugin topic repo (list of dicts), fetching from the
+    GitHub search API when no local cache exists. The created-date range is
+    split recursively (see _collect_range) so more than 1000 repos can be
+    collected without tripping GitHub's per-query result cap."""
+    if os.path.exists(REPO_CACHE):
+        print("repos: using local cache", REPO_CACHE)
+        return json.load(open(REPO_CACHE))
+    items, seen = [], set()
+    today = datetime.date.today()
+    print(f"repos: fetching topic:dsh-plugin (created 2008-01-01..{today})")
+    _collect_range("2008-01-01", today.isoformat(), items, seen)
+    if not items:
+        sys.exit("GitHub search API returned no repos")
     json.dump(items, open(_cache_path(REPO_CACHE), "w"))
-    print(f"repos: fetched {len(items)} from GitHub search API")
+    print(f"repos: fetched {len(items)} (unique) from GitHub search API")
     return items
 
 repos = fetch_repos()
