@@ -773,3 +773,6 @@ code {
   }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* the hidden attribute must always win over any explicit display rule */
+[hidden] { display: none !important; }
