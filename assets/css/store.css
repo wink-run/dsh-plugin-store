@@ -535,6 +535,48 @@ code {
 .load-more-wrap .btn { padding: 10px 26px; }
 
 /* ==========================================================================
+   TRENDS
+   ========================================================================== */
+.trends { border-top: 1px solid var(--border); }
+.trends-inner { max-width: 1280px; margin: 0 auto; padding: 56px 20px 28px; }
+.trends-inner .section-title { margin-bottom: 22px; font-size: 24px; }
+.trend-card {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius-l); padding: 20px 20px 12px;
+}
+.trend-head {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; margin-bottom: 6px; flex-wrap: wrap;
+}
+.trend-legend { display: flex; gap: 18px; font-size: 13px; color: var(--text-2); }
+.legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.legend-plugins { background: var(--accent); }
+.legend-stars { background: var(--text-1); }
+.trend-note { font-size: 12px; color: var(--text-3); }
+.trend-chart { position: relative; }
+.trend-chart svg { display: block; width: 100%; height: auto; }
+.trend-chart svg text { font-family: var(--font-mono); }
+
+.trend-tip {
+  position: absolute; pointer-events: none; z-index: 5;
+  background: var(--bg-3); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s); padding: 8px 10px;
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--text-1);
+  box-shadow: var(--shadow-pop);
+}
+.trend-tip .tip-date { margin-bottom: 4px; color: var(--text-3); font-size: 10.5px; }
+.trend-tip .tip-row { display: flex; align-items: center; gap: 6px; line-height: 1.5; }
+.tip-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+.tip-plugins { background: var(--accent); }
+.tip-stars { background: var(--text-1); }
+
+@media (max-width: 640px) {
+  .trends-inner { padding-top: 40px; }
+  .trend-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+
+/* ==========================================================================
    ABOUT
    ========================================================================== */
 .about { border-top: 1px solid var(--border); background: var(--bg-1); }

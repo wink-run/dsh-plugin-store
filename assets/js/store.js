@@ -116,6 +116,131 @@
     $("#footer-updated").textContent = "数据抓取于 " + (updated || "-") + " · GitHub topic dsh-plugin";
   }
 
+  /* ---------------- trend chart ---------------- */
+  let trendData = [];
+  let trendTimer = 0;
+
+  async function loadTrend() {
+    const el = $("#trend-chart");
+    if (!el) return;
+    try {
+      const res = await fetch("data/stats_history.json", { cache: "no-store" });
+      if (!res.ok) return;
+      trendData = await res.json();
+    } catch (e) { return; }
+    if (!Array.isArray(trendData) || trendData.length < 2) return;
+    renderTrend();
+  }
+
+  function trendColors() {
+    const css = getComputedStyle(document.documentElement);
+    const v = (n) => css.getPropertyValue(n).trim() || "";
+    return {
+      accent: v("--accent") || "#4d6bfe",
+      line2: v("--text-1") || "#eef1f6",
+      grid: v("--text-3") || "#6c7482",
+      tipBg: v("--bg-3") || "#181b24",
+      tipText: v("--text-1") || "#eef1f6",
+      tipSub: v("--text-2") || "#a2a9b6",
+    };
+  }
+
+  function fmtAxis(v, max) {
+    if (max >= 100000) return (v / 1000).toFixed(0) + "k";
+    if (max >= 10000) return (v / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+    return fmtNumber(Math.round(v));
+  }
+
+  function renderTrend() {
+    const wrap = $("#trend-chart");
+    if (!wrap || trendData.length < 2) return;
+    const c = trendColors();
+    const W = Math.max(320, wrap.clientWidth || 800);
+    const H = 260;
+    const pad = { l: 44, r: 44, t: 12, b: 30 };
+    const iw = W - pad.l - pad.r;
+    const ih = H - pad.t - pad.b;
+    const pts = trendData;
+    const n = pts.length;
+    const maxP = Math.max(...pts.map((p) => p.plugins));
+    const maxS = Math.max(...pts.map((p) => p.stars));
+    const X = (i) => pad.l + (i / (n - 1)) * iw;
+    const YP = (v) => pad.t + ih - (v / maxP) * ih;
+    const YS = (v) => pad.t + ih - (v / maxS) * ih;
+    const lineP = pts.map((p, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${YP(p.plugins).toFixed(1)}`).join(" ");
+    const lineS = pts.map((p, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${YS(p.stars).toFixed(1)}`).join(" ");
+    const areaP = `M${pad.l},${pad.t + ih} L${pad.l},${YP(pts[0].plugins).toFixed(1)} ` +
+      pts.slice(1).map((p, i) => `L${X(i + 1).toFixed(1)},${YP(p.plugins).toFixed(1)}`).join(" ") +
+      ` L${pad.l + iw},${pad.t + ih} Z`;
+
+    let grid = "";
+    for (let k = 0; k <= 4; k++) {
+      const y = pad.t + ih - (k / 4) * ih;
+      grid += `<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${pad.l + iw}" y2="${y.toFixed(1)}" stroke="${c.grid}" stroke-opacity="0.35" stroke-width="1"/>`;
+      grid += `<text x="${pad.l - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="10.5" fill="${c.axis}">${fmtAxis((maxP * k) / 4, maxP)}</text>`;
+      grid += `<text x="${pad.l + iw + 8}" y="${(y + 4).toFixed(1)}" text-anchor="start" font-size="10.5" fill="${c.axis}">${fmtAxis((maxS * k) / 4, maxS)}</text>`;
+    }
+
+    const sameYear = pts[0].date.slice(0, 4) === pts[n - 1].date.slice(0, 4);
+    const fmtX = (d) => (sameYear ? d.slice(5) : d.slice(0, 7));
+    let xLabels = "";
+    [0, Math.floor((n - 1) / 2), n - 1].forEach((i) => {
+      xLabels += `<text x="${X(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="${c.grid}">${fmtX(pts[i].date)}</text>`;
+    });
+
+    wrap.innerHTML =
+      `<svg viewBox="0 0 ${W} ${H}" role="presentation" aria-hidden="true">
+        <defs>
+          <linearGradient id="tgArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${c.accent}" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="${c.accent}" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+        ${grid}
+        <line x1="${pad.l}" y1="${pad.t + ih}" x2="${pad.l + iw}" y2="${pad.t + ih}" stroke="${c.grid}" stroke-opacity="0.6" stroke-width="1"/>
+        ${xLabels}
+        <path d="${areaP}" fill="url(#tgArea)"/>
+        <path d="${lineS}" fill="none" stroke="${c.line2}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.85"/>
+        <path d="${lineP}" fill="none" stroke="${c.accent}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <line id="trend-cursor" x1="0" y1="${pad.t}" x2="0" y2="${pad.t + ih}" stroke="${c.grid}" stroke-opacity="0" stroke-width="1"/>
+        <circle id="trend-dotP" r="3.5" fill="${c.accent}" stroke="${c.tipBg}" stroke-width="1.5" opacity="0"/>
+        <circle id="trend-dotS" r="3.5" fill="${c.line2}" stroke="${c.tipBg}" stroke-width="1.5" opacity="0"/>
+      </svg>
+      <div class="trend-tip" id="trend-tip" hidden></div>`;
+
+    const svg = wrap.querySelector("svg");
+    const tip = $("#trend-tip", wrap);
+    const cursor = $("#trend-cursor", wrap);
+    const dotP = $("#trend-dotP", wrap);
+    const dotS = $("#trend-dotS", wrap);
+    const move = (ev) => {
+      const rect = svg.getBoundingClientRect();
+      const scale = rect.width / W;
+      const mx = (ev.clientX - rect.left) / scale;
+      const ratio = Math.max(0, Math.min(1, (mx - pad.l) / iw));
+      const i = Math.round(ratio * (n - 1));
+      const cx = X(i);
+      cursor.setAttribute("x1", cx); cursor.setAttribute("x2", cx);
+      cursor.setAttribute("stroke-opacity", 0.5);
+      dotP.setAttribute("cx", cx); dotP.setAttribute("cy", YP(pts[i].plugins).toFixed(1)); dotP.setAttribute("opacity", 1);
+      dotS.setAttribute("cx", cx); dotS.setAttribute("cy", YS(pts[i].stars).toFixed(1)); dotS.setAttribute("opacity", 1);
+      tip.hidden = false;
+      tip.style.left = Math.min(Math.max(cx - 70, 0), rect.width - 150) + "px";
+      tip.style.top = "10px";
+      tip.innerHTML =
+        `<div class="tip-date">${pts[i].date}</div>` +
+        `<div class="tip-row"><i class="tip-dot tip-plugins"></i>插件 ${fmtNumber(pts[i].plugins)}</div>` +
+        `<div class="tip-row"><i class="tip-dot tip-stars"></i>Stars ${fmtNumber(pts[i].stars)}</div>`;
+    };
+    svg.addEventListener("mousemove", move);
+    svg.addEventListener("mouseleave", () => {
+      cursor.setAttribute("stroke-opacity", 0);
+      dotP.setAttribute("opacity", 0);
+      dotS.setAttribute("opacity", 0);
+      tip.hidden = true;
+    });
+  }
+
   /* ---------------- sidebar ---------------- */
   function renderSidebar() {
     const counts = {};
@@ -343,6 +468,7 @@
       state.theme = state.theme === "dark" ? "light" : "dark";
       document.documentElement.dataset.theme = state.theme;
       try { localStorage.setItem("dsh-store-theme", state.theme); } catch (e) {}
+      renderTrend();
     });
   }
 
@@ -444,6 +570,11 @@
     emptyEl = $("#empty");
     initTheme();
     bindEvents();
+    window.addEventListener("resize", () => {
+      clearTimeout(trendTimer);
+      trendTimer = setTimeout(renderTrend, 160);
+    });
+    loadTrend();
     const plugin = readHash();
     if (plugin) {
       loadData().then(() => {

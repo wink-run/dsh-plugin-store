@@ -699,3 +699,59 @@ for cid in CAT_ORDER + ["misc"]:
         print(f"  {cid:12s} {cc[cid]:4d}  {CATS.get(cid,{}).get('label_zh','其他')}")
 tot = sum(x["stars"] for x in records)
 print("total stars:", tot)
+
+# --------------------------------------------------------------------------
+# 8. Trend history (data/stats_history.json) for the homepage charts.
+#    First run: build an approximate series from created_at. The repo-count
+#    curve is exact (cumulative creation dates); the stars curve approximates
+#    each repo's stars ramping linearly from 0 at creation to its current
+#    value today. Every run then upserts today's real snapshot, so the series
+#    becomes exact over time.
+# --------------------------------------------------------------------------
+HIST_PATH = os.path.join(ROOT, "data", "stats_history.json")
+
+def _approx_history(raw_repos):
+    today = datetime.date.today()
+    dated = []
+    for r in raw_repos:
+        if r.get("full_name") == "deepseek-ai/deepseek-harness":
+            continue  # core repo excluded from the store, same as the page stats
+        try:
+            d = datetime.date.fromisoformat((r.get("created_at") or "")[:10])
+        except Exception:
+            continue
+        dated.append((d, r.get("stargazers_count") or 0))
+    if not dated:
+        return []
+    start = min(d for d, _ in dated)
+    span = max(1, (today - start).days)
+    step = max(1, span // 60)  # ~60 sample points
+    points = []
+    t = start
+    while t <= today:
+        plugins = sum(1 for d, _ in dated if d <= t)
+        stars = 0
+        for d, s in dated:
+            if d <= t:
+                frac = min(1.0, (t - d).days / max(1, (today - d).days))
+                stars += s * frac
+        points.append({"date": t.isoformat(), "plugins": plugins, "stars": round(stars)})
+        t += datetime.timedelta(days=step)
+    return points
+
+def _today_snapshot(recs):
+    today = datetime.date.today().isoformat()
+    return {"date": today, "plugins": len(recs), "stars": sum(r["stars"] for r in recs)}
+
+hist = []
+if os.path.exists(HIST_PATH):
+    hist = json.load(open(HIST_PATH))
+else:
+    hist = _approx_history(repos)
+    print("stats history: built initial approximate series", len(hist), "points")
+
+snap = _today_snapshot(records)
+hist = [p for p in hist if p["date"] != snap["date"]] + [snap]
+hist.sort(key=lambda p: p["date"])
+json.dump(hist, open(HIST_PATH, "w"), ensure_ascii=False)
+print(f"stats history: wrote stats_history.json ({len(hist)} points, {hist[0]['date']}..{hist[-1]['date']})")
