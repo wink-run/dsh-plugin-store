@@ -133,7 +133,7 @@ crontab -e
 /opt/ds-plugin-store/scripts/cron-refresh.sh
 ```
 
-脚本行为：`git pull --ff-only origin main` 拉取最新数据 → 检测到 Docker Compose 服务则 `docker compose up -d --build` 重建镜像并重启容器，使新数据生效；无 Docker 服务时只拉取，提示自行重启（如 `node server.js`）。
+脚本行为：`git pull --ff-only origin main` 拉取最新数据 → `docker compose down` 停止服务 → `docker compose up -d --build` 重建镜像并启动，使新数据生效。
 
 ### 本地重新抓取
 
