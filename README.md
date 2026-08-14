@@ -98,14 +98,14 @@ docker exec dsh-store nginx -t   # 容器内校验 nginx 配置
 | `data/plugins.json` | 插件目录（1080 个仓库的整理结果） |
 | `data/stats_history.json` | 走势图数据：插件总数与 Stars 的时间序列（首次按创建日期累计近似，之后以真实快照校准） |
 | `scripts/build_data.py` | 数据构建脚本：抓取、分类、安装命令、README 摘要、精选标记、走势数据 |
-| `.github/workflows/update-plugins.yml` | 每 3 小时自动抓取并提交新数据 |
+| `.github/workflows/update-plugins.yml` | 每小时自动抓取并提交新数据 |
 | `assets/css/` `assets/js/` | 页面样式与应用脚本（含 SVG 走势图渲染） |
 | `assets/fonts/` | 自托管字体（Space Grotesk + JetBrains Mono） |
 | `assets/img/` | 品牌素材：Token Bank logo（SVG）、Wink 品牌图（PNG）、DeepSeek logo |
 
 ### 自动更新（GitHub Actions）
 
-仓库已配置定时工作流，**每 3 小时**（`0 */3 * * *`，UTC）自动执行：
+仓库已配置定时工作流，**每小时**（`0 * * * *`，UTC）自动执行：
 
 1. 通过 GitHub Search API 抓取全部 `topic:dsh-plugin` 仓库（自动分页，`GITHUB_TOKEN` 自动提供、提高速率限制）；
 2. 拉取头部 60 个插件仓库的 README，生成详情摘要；
@@ -125,10 +125,10 @@ cp .env.example .env                # 设置 DOMAIN
 ./scripts/gen-certs.sh your.domain  # 或把正式证书放入 ./certs
 docker compose up -d --build
 
-# 2. 配置 crontab（每 3 小时，日志写入文件）
+# 2. 配置 crontab（每小时，日志写入文件）
 crontab -e
 # 加入一行：
-# 0 */3 * * * /opt/ds-plugin-store/scripts/cron-refresh.sh >> /var/log/dsh-store-refresh.log 2>&1
+# 0 * * * * /opt/ds-plugin-store/scripts/cron-refresh.sh >> /var/log/dsh-store-refresh.log 2>&1
 
 # 3. 手动跑一次验证
 /opt/ds-plugin-store/scripts/cron-refresh.sh
