@@ -95,22 +95,37 @@ docker exec dsh-store nginx -t   # 容器内校验 nginx 配置
 
 | 文件 | 说明 |
 | --- | --- |
-| `data/plugins.json` | 插件目录（865 个仓库的整理结果） |
-| `scripts/build_data.py` | 数据构建脚本：分类、安装命令、README 摘要、精选标记 |
+| `data/plugins.json` | 插件目录（990 个仓库的整理结果） |
+| `scripts/build_data.py` | 数据构建脚本：抓取、分类、安装命令、README 摘要、精选标记 |
+| `.github/workflows/update-plugins.yml` | 每 6 小时自动抓取并提交新数据 |
 | `assets/css/` `assets/js/` | 页面样式与应用脚本 |
 | `assets/fonts/` | 自托管字体（Space Grotesk + JetBrains Mono） |
-| `assets/img/` | 品牌素材：Token Bank logo（SVG）、Wink 品牌图（PNG） |
+| `assets/img/` | 品牌素材：Token Bank logo（SVG）、Wink 品牌图（PNG）、DeepSeek logo |
 
-重新抓取并重建数据：
+### 自动更新（GitHub Actions）
+
+仓库已配置定时工作流，**每 6 小时**（`0 */6 * * *`，UTC）自动执行：
+
+1. 通过 GitHub Search API 抓取全部 `topic:dsh-plugin` 仓库（自动分页，`GITHUB_TOKEN` 自动提供、提高速率限制）；
+2. 拉取头部 60 个插件仓库的 README，生成详情摘要；
+3. 重建 `data/plugins.json`，有变化则自动提交推送（`[skip ci]`，不会触发递归）。
+
+手动触发：GitHub 仓库 **Actions** 页 → **Update plugin data** → **Run workflow**。
+
+### 本地重新抓取
+
+脚本在干净环境（无本地缓存）会自动走完整抓取流程，与 CI 行为一致；本地存在缓存时增量复用（可用环境变量覆盖）：
 
 ```bash
-python3 scripts/build_data.py   # 需要先准备原始仓库 JSON（见脚本顶部注释）
+python3 scripts/build_data.py
+# 或强制全新抓取：
+REPO_CACHE=/tmp/fresh_repos.json README_DIR=/tmp/fresh_readmes python3 scripts/build_data.py
 ```
 
 默认统计（当前快照）：
 
-- 插件总数：865
-- 社区 Stars：39,681+（不含 deepseek-harness 核心仓库本身）
+- 插件总数：990
+- 社区 Stars：40,867+（不含 deepseek-harness 核心仓库本身）
 - 数据更新：抓取当日（GitHub Search API，`topic:dsh-plugin`）
 
 ## 安全提示

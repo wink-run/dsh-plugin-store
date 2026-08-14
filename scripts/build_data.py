@@ -12,15 +12,70 @@ Sources:
 
 Output: data/plugins.json  (flat array of plugin records)
 """
-import json, os, re, sys
+import json, os, re, sys, time, urllib.error, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # --------------------------------------------------------------------------
-# 1. Load raw repos
+# 1. Load raw repos.
+#    Local dev: reuse the cached copy when present (fast, offline-friendly).
+#    CI (GitHub Actions) / fresh machine: fetch every `dsh-plugin` topic repo
+#    from the GitHub search API. GITHUB_TOKEN raises the rate limits and is
+#    auto-provided by Actions.
 # --------------------------------------------------------------------------
-repos = json.load(open('/tmp/dsh_all_repos.json'))
-by_name = {r['full_name']: r for r in repos}
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+REPO_CACHE = os.environ.get("REPO_CACHE", "/tmp/dsh_all_repos.json")
+README_DIR = os.environ.get("README_DIR", "/tmp/dsh_readmes")
+
+def _gh_request(url):
+    req = urllib.request.Request(url, headers={
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "dsh-plugin-store-updater",
+    })
+    if GITHUB_TOKEN:
+        req.add_header("Authorization", "Bearer " + GITHUB_TOKEN)
+    return req
+
+def _cache_path(p):
+    d = os.path.dirname(p)
+    if d and not os.path.isdir(d):
+        os.makedirs(d, exist_ok=True)
+    return p
+
+def fetch_repos():
+    """Return every dsh-plugin topic repo (list of dicts), fetching from the
+    GitHub search API when no local cache exists."""
+    if os.path.exists(REPO_CACHE):
+        print("repos: using local cache", REPO_CACHE)
+        return json.load(open(REPO_CACHE))
+    page, items = 1, []
+    while True:
+        url = ("https://api.github.com/search/repositories"
+               "?q=topic:dsh-plugin&sort=stars&order=desc"
+               f"&per_page=100&page={page}")
+        try:
+            with urllib.request.urlopen(_gh_request(url), timeout=30) as resp:
+                data = json.load(resp)
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", "replace")[:400]
+            sys.exit(f"GitHub search API error {e.code}: {body}")
+        except Exception as e:
+            sys.exit(f"GitHub search API request failed: {e}")
+        total = data.get("total_count", 0)
+        batch = data.get("items", [])
+        items.extend(batch)
+        print(f"  page {page}: {len(batch)} repos (total {total})")
+        if not batch or len(items) >= total:
+            break
+        page += 1
+        if page > 50:  # safety valve
+            break
+        time.sleep(0.3)
+    json.dump(items, open(_cache_path(REPO_CACHE), "w"))
+    print(f"repos: fetched {len(items)} from GitHub search API")
+    return items
+
+repos = fetch_repos()
 
 # --------------------------------------------------------------------------
 # 2. Category taxonomy + priority-ordered classification rules.
@@ -516,7 +571,39 @@ records.sort(key=lambda x: (-x["stars"], x["name"].lower()))
 # --------------------------------------------------------------------------
 # 7. README excerpts (optional enrichment for the detail modal) + featured flag
 # --------------------------------------------------------------------------
-README_DIR = "/tmp/dsh_readmes"
+def fetch_readmes(sorted_repos, top_n=60):
+    """Fetch README.md for the top-starred repos via raw.githubusercontent.com
+    (no API rate limit). Files already cached are skipped, so local dev is
+    incremental and CI on a fresh runner pulls everything it needs."""
+    os.makedirs(README_DIR, exist_ok=True)
+    have = set(os.listdir(README_DIR))
+    new = 0
+    for r in sorted_repos[:top_n]:
+        fname = r["full_name"].replace("/", "__") + ".md"
+        if fname in have:
+            continue
+        owner, _, repo = r["full_name"].partition("/")
+        ok = False
+        for branch in {r.get("default_branch", "main"), "main", "master"}:
+            url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/README.md"
+            try:
+                with urllib.request.urlopen(urllib.request.Request(
+                        url, headers={"User-Agent": "dsh-plugin-store-updater"}),
+                        timeout=20) as resp:
+                    text = resp.read().decode("utf-8", "replace")
+                open(os.path.join(README_DIR, fname), "w", encoding="utf-8").write(text)
+                new += 1
+                ok = True
+                break
+            except Exception:
+                continue
+        if not ok:
+            print(f"  no README: {r['full_name']}")
+        time.sleep(0.15)
+    print(f"readmes: {new} new of {top_n} targeted, {len(os.listdir(README_DIR))} cached")
+
+# ensure READMEs exist (pulls the top-starred repos on a fresh machine)
+fetch_readmes(sorted(repos, key=lambda x: -(x.get("stargazers_count") or 0)))
 
 def clean_md(text):
     import re as _re

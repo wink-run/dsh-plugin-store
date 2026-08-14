@@ -3,3 +3,5 @@ node_modules/
 *.log
 certs/
 .env
+__pycache__/
+*.pyc

@@ -1,0 +1,60 @@
+# ============================================================================
+# DSH Store · automated plugin data refresh
+#
+# Runs every 6 hours (plus on manual dispatch from the Actions tab):
+#   1. fetches every `dsh-plugin` topic repo from the GitHub search API
+#   2. pulls README excerpts for the top-starred plugins
+#   3. rebuilds data/plugins.json and commits/pushes it when anything changed
+#
+# The GITHUB_TOKEN secret is provided automatically by Actions; no setup
+# needed. Only data/plugins.json is committed by this job.
+# ============================================================================
+
+name: Update plugin data
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours at minute 0 (UTC)
+  workflow_dispatch: # manual trigger from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-plugins
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch latest plugins and build data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/build_data.py
+
+      - name: Commit refreshed data
+        id: commit
+        run: |
+          if git diff --quiet data/plugins.json; then
+            echo "No changes to data/plugins.json"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/plugins.json
+            git commit -m "chore: refresh plugin data (automated) [skip ci]"
+            echo "committed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push
+        if: steps.commit.outputs.committed == 'true'
+        run: git push
