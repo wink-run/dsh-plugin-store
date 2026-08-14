@@ -690,8 +690,9 @@ for r in records:
 
 out_path = os.path.join(ROOT, "data", "plugins.json")
 generated_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
-payload = {"generated_at": generated_at, "records": records}
-json.dump(payload, open(out_path, "w"), ensure_ascii=False, separators=(",", ":"))
+json.dump(records, open(out_path, "w"), ensure_ascii=False, separators=(",", ":"))
+meta_path = os.path.join(ROOT, "data", "meta.json")
+json.dump({"generated_at": generated_at}, open(meta_path, "w"), ensure_ascii=False)
 print("wrote", out_path)
 print("generated_at:", generated_at)
 print("plugins:", len(records))
@@ -705,56 +706,69 @@ print("total stars:", tot)
 
 # --------------------------------------------------------------------------
 # 8. Trend history (data/stats_history.json) for the homepage charts.
-#    First run: build an approximate series from created_at. The repo-count
-#    curve is exact (cumulative creation dates); the stars curve approximates
-#    each repo's stars ramping linearly from 0 at creation to its current
-#    value today. Every run then upserts today's real snapshot, so the series
-#    becomes exact over time.
+#    Every point is a REAL fetch snapshot. Past snapshots are reconstructed
+#    from the git history of data/plugins.json (each commit that touched it
+#    is one fetch); every run then appends the current snapshot. No
+#    approximate/derived data is ever written.
 # --------------------------------------------------------------------------
 HIST_PATH = os.path.join(ROOT, "data", "stats_history.json")
 
-def _approx_history(raw_repos):
-    today = datetime.date.today()
-    dated = []
-    for r in raw_repos:
-        if r.get("full_name") == "deepseek-ai/deepseek-harness":
-            continue  # core repo excluded from the store, same as the page stats
-        try:
-            d = datetime.date.fromisoformat((r.get("created_at") or "")[:10])
-        except Exception:
-            continue
-        dated.append((d, r.get("stargazers_count") or 0))
-    if not dated:
-        return []
-    start = min(d for d, _ in dated)
-    span = max(1, (today - start).days)
-    step = max(1, span // 60)  # ~60 sample points
-    points = []
-    t = start
-    while t <= today:
-        plugins = sum(1 for d, _ in dated if d <= t)
-        stars = 0
-        for d, s in dated:
-            if d <= t:
-                frac = min(1.0, (t - d).days / max(1, (today - d).days))
-                stars += s * frac
-        points.append({"date": t.isoformat(), "plugins": plugins, "stars": round(stars)})
-        t += datetime.timedelta(days=step)
-    return points
+def _git_snapshot_history():
+    import subprocess
+    hist = []
+    try:
+        out = subprocess.run(
+            ["git", "log", "--format=%H|%aI", "--", "data/plugins.json"],
+            capture_output=True, text=True, cwd=ROOT,
+        ).stdout
+        for line in out.strip().splitlines():
+            if "|" not in line:
+                continue
+            sha, author_iso = line.split("|", 1)
+            blob = subprocess.run(
+                ["git", "show", sha + ":data/plugins.json"],
+                capture_output=True, text=True, cwd=ROOT,
+            ).stdout
+            if not blob:
+                continue
+            try:
+                data = json.loads(blob)
+            except Exception:
+                continue
+            if isinstance(data, list):
+                recs, gen = data, None
+            else:
+                recs, gen = data.get("records", []), data.get("generated_at")
+            ts = gen or author_iso
+            try:
+                t = datetime.datetime.fromisoformat(ts)
+                if t.tzinfo is None:
+                    t = t.replace(tzinfo=datetime.timezone.utc)
+                tkey = t.astimezone(datetime.timezone.utc).isoformat(timespec="seconds")
+            except Exception:
+                tkey = ts
+            hist.append({"time": tkey, "plugins": len(recs),
+                         "stars": sum(r.get("stars", 0) for r in recs)})
+    except Exception as e:
+        print("stats history: git snapshot unavailable:", e)
+    return hist
 
-def _today_snapshot(recs):
-    today = datetime.date.today().isoformat()
-    return {"date": today, "plugins": len(recs), "stars": sum(r["stars"] for r in recs)}
+def _dedupe_minute(points):
+    by_min = {}
+    for p in points:
+        by_min[p["time"][:16]] = p  # keep the latest within the same minute
+    return sorted(by_min.values(), key=lambda p: p["time"])
 
-hist = []
-if os.path.exists(HIST_PATH):
-    hist = json.load(open(HIST_PATH))
-else:
-    hist = _approx_history(repos)
-    print("stats history: built initial approximate series", len(hist), "points")
-
-snap = _today_snapshot(records)
-hist = [p for p in hist if p["date"] != snap["date"]] + [snap]
-hist.sort(key=lambda p: p["date"])
+hist = _dedupe_minute(_git_snapshot_history())
+if hist:
+    # Drop anomalous snapshots: one early Action run (03d679d) used a buggy
+    # build that pulled in non-plugin high-star repos, inflating the stars
+    # total ~3x. Keep the real snapshots by filtering on a robust median.
+    import statistics
+    med = statistics.median(p["stars"] for p in hist)
+    hist = [p for p in hist if p["stars"] <= max(med * 2, 2000)]
+now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+hist.append({"time": now, "plugins": len(records), "stars": tot})
+hist = _dedupe_minute(hist)
 json.dump(hist, open(HIST_PATH, "w"), ensure_ascii=False)
-print(f"stats history: wrote stats_history.json ({len(hist)} points, {hist[0]['date']}..{hist[-1]['date']})")
+print(f"stats history: wrote stats_history.json ({len(hist)} real fetch snapshots, {hist[0]['time']}..{hist[-1]['time']})")

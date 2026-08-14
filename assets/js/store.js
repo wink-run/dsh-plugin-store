@@ -417,11 +417,15 @@
       grid += `<text x="${pad.l + iw + 8}" y="${(y + 4).toFixed(1)}" text-anchor="start" font-size="10.5" fill="${c.axis}">${fmtAxis((maxS * k) / 4, maxS)}</text>`;
     }
 
-    const sameYear = pts[0].date.slice(0, 4) === pts[n - 1].date.slice(0, 4);
-    const fmtX = (d) => (sameYear ? d.slice(5) : d.slice(0, 7));
+    const fmtX = (t) => {
+      const d = new Date(t);
+      if (Number.isNaN(d.getTime())) return (t || "").slice(5, 16);
+      const p = (n) => String(n).padStart(2, "0");
+      return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:00`;
+    };
     let xLabels = "";
     [0, Math.floor((n - 1) / 2), n - 1].forEach((i) => {
-      xLabels += `<text x="${X(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="${c.grid}">${fmtX(pts[i].date)}</text>`;
+      xLabels += `<text x="${X(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="${c.grid}">${fmtX(pts[i].time)}</text>`;
     });
 
     wrap.innerHTML =
@@ -464,7 +468,7 @@
       tip.style.left = Math.min(Math.max(cx - 70, 0), rect.width - 150) + "px";
       tip.style.top = "10px";
       tip.innerHTML =
-        `<div class="tip-date">${pts[i].date}</div>` +
+        `<div class="tip-date">${fmtStamp(pts[i].time)}</div>` +
         `<div class="tip-row"><i class="tip-dot tip-plugins"></i>${t("trend.plugins")} ${fmtNumber(pts[i].plugins)}</div>` +
         `<div class="tip-row"><i class="tip-dot tip-stars"></i>Stars ${fmtNumber(pts[i].stars)}</div>`;
     };

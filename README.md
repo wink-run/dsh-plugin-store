@@ -98,7 +98,7 @@ docker exec dsh-store nginx -t   # 容器内校验 nginx 配置
 | 文件 | 说明 |
 | --- | --- |
 | `data/plugins.json` | 插件目录（1080 个仓库的整理结果） |
-| `data/stats_history.json` | 走势图数据：插件总数与 Stars 的时间序列（首次按创建日期累计近似，之后以真实快照校准） |
+| `data/stats_history.json` | 走势图数据：每次爬取的真实快照（时间/插件数/Stars），历史由 git 提交记录重建 |
 | `scripts/build_data.py` | 数据构建脚本：抓取、分类、安装命令、README 摘要、精选标记、走势数据 |
 | `.github/workflows/update-plugins.yml` | 每小时自动抓取并提交新数据 |
 | `assets/css/` `assets/js/` | 页面样式与应用脚本（含 SVG 走势图渲染） |
