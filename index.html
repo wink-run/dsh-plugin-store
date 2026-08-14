@@ -85,32 +85,13 @@
           </dl>
         </div>
 
-        <aside class="wink-panel" aria-label="Wink 生态工具">
-          <p class="wink-panel-label">更多 Wink 工具</p>
-          <a class="wink-row" href="https://tokenbank.wink.run" target="_blank" rel="noopener">
-            <img class="wink-logo" src="assets/img/tokenbank.svg" alt="Token Bank" width="44" height="44" loading="lazy">
-            <span class="wink-text">
-              <span class="wink-name">Token Bank</span>
-              <span class="wink-desc">deepseek-harness 好管家：管理模型、skill 等，还可纳管 Claude / Cursor / Codex，闲置算力换积分</span>
-            </span>
-            <svg class="wink-arrow" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5h8v8M15 5 7 13"/></svg>
-          </a>
-          <a class="wink-row" href="https://wink.run/pings" target="_blank" rel="noopener">
-            <img class="wink-logo" src="assets/img/wink_brand.png" alt="Wink Pings" width="44" height="44" loading="lazy">
-            <span class="wink-text">
-              <span class="wink-name">Wink Pings</span>
-              <span class="wink-desc">第一手 AI 领域资讯，自定义频道精准推送个性化价值信息</span>
-            </span>
-            <svg class="wink-arrow" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5h8v8M15 5 7 13"/></svg>
-          </a>
-          <a class="wink-row" href="https://github.com/wink-run/deepseek-harness-desktop" target="_blank" rel="noopener">
-            <img class="wink-logo" src="assets/img/deepseek.png" alt="DeepSeek" width="44" height="44" loading="lazy">
-            <span class="wink-text">
-              <span class="wink-name">DeepSeek-Harness 桌面版</span>
-              <span class="wink-desc">免部署，一键开启 deepseek-harness</span>
-            </span>
-            <svg class="wink-arrow" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5h8v8M15 5 7 13"/></svg>
-          </a>
+        <aside class="trend-panel" aria-label="数据趋势">
+          <p class="trend-panel-label">数据趋势</p>
+          <div class="trend-chart" id="trend-chart" role="img" aria-label="插件总数与社区 Stars 走势图"></div>
+          <div class="trend-legend" aria-hidden="true">
+            <span class="legend-item"><i class="legend-dot legend-plugins"></i>插件总数</span>
+            <span class="legend-item"><i class="legend-dot legend-stars"></i>社区 Stars</span>
+          </div>
         </aside>
       </div>
     </div>
@@ -182,19 +163,29 @@
     </section>
   </div>
 
-  <!-- ============ TRENDS ============ -->
-  <section class="trends" id="trends">
-    <div class="trends-inner">
-      <h2 class="section-title">数据趋势</h2>
-      <div class="trend-card">
-        <div class="trend-head">
-          <div class="trend-legend" aria-hidden="true">
-            <span class="legend-item"><i class="legend-dot legend-plugins"></i>插件总数</span>
-            <span class="legend-item"><i class="legend-dot legend-stars"></i>社区 Stars</span>
-          </div>
-          <p class="trend-note">每 3 小时更新 · 历史为按创建日期累计，之后以真实快照校准</p>
-        </div>
-        <div class="trend-chart" id="trend-chart" role="img" aria-label="插件总数与社区 Stars 走势图"></div>
+  <!-- ============ WINK TOOLS ============ -->
+  <section class="wink-tools" id="wink-tools">
+    <div class="wink-tools-inner">
+      <h2 class="section-title">更多 Wink 工具</h2>
+      <div class="wink-tools-grid">
+        <a class="wink-tool" href="https://tokenbank.wink.run" target="_blank" rel="noopener">
+          <img class="wink-logo" src="assets/img/tokenbank.svg" alt="Token Bank" width="44" height="44" loading="lazy">
+          <span class="wink-tool-name">Token Bank</span>
+          <span class="wink-tool-desc">deepseek-harness 好管家：管理模型、skill 等，还可纳管 Claude / Cursor / Codex，闲置算力换积分</span>
+          <svg class="wink-arrow" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5h8v8M15 5 7 13"/></svg>
+        </a>
+        <a class="wink-tool" href="https://wink.run/pings" target="_blank" rel="noopener">
+          <img class="wink-logo" src="assets/img/wink_brand.png" alt="Wink Pings" width="44" height="44" loading="lazy">
+          <span class="wink-tool-name">Wink Pings</span>
+          <span class="wink-tool-desc">第一手 AI 领域资讯，自定义频道精准推送个性化价值信息</span>
+          <svg class="wink-arrow" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5h8v8M15 5 7 13"/></svg>
+        </a>
+        <a class="wink-tool" href="https://github.com/wink-run/deepseek-harness-desktop" target="_blank" rel="noopener">
+          <img class="wink-logo" src="assets/img/deepseek.png" alt="DeepSeek" width="44" height="44" loading="lazy">
+          <span class="wink-tool-name">DeepSeek-Harness 桌面版</span>
+          <span class="wink-tool-desc">免部署，一键开启 deepseek-harness</span>
+          <svg class="wink-arrow" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5h8v8M15 5 7 13"/></svg>
+        </a>
       </div>
     </div>
   </section>
