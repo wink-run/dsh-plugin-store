@@ -690,9 +690,8 @@ for r in records:
 
 out_path = os.path.join(ROOT, "data", "plugins.json")
 generated_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
-json.dump(records, open(out_path, "w"), ensure_ascii=False, separators=(",", ":"))
-meta_path = os.path.join(ROOT, "data", "meta.json")
-json.dump({"generated_at": generated_at}, open(meta_path, "w"), ensure_ascii=False)
+payload = {"generated_at": generated_at, "records": records}
+json.dump(payload, open(out_path, "w"), ensure_ascii=False, separators=(",", ":"))
 print("wrote", out_path)
 print("generated_at:", generated_at)
 print("plugins:", len(records))
