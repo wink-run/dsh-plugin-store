@@ -211,14 +211,22 @@
   const tFmt = (k, vars) => { let s = t(k); Object.keys(vars || {}).forEach((kk) => { s = s.replace("{" + kk + "}", vars[kk]); }); return s; };
 
   function initLang() {
-    let saved;
-    try { saved = localStorage.getItem("dsh-store-lang"); } catch (e) {}
-    const nav = (navigator.language || "zh").toLowerCase();
-    state.lang = saved === "zh" || saved === "en" ? saved : (nav.startsWith("zh") ? "zh" : "en");
+    const nav = (navigator.language || navigator.languages?.[0] || "zh").toLowerCase();
+    const browserLang = nav.startsWith("zh") ? "zh" : "en";
+    let saved, manual;
+    try {
+      saved = localStorage.getItem("dsh-store-lang");
+      manual = localStorage.getItem("dsh-store-lang-manual");
+    } catch (e) {}
+    // Browser language wins unless the user explicitly toggled the language.
+    state.lang = manual === "1" && (saved === "zh" || saved === "en") ? saved : browserLang;
     applyLang();
     $("#lang-toggle").addEventListener("click", () => {
       state.lang = state.lang === "zh" ? "en" : "zh";
-      try { localStorage.setItem("dsh-store-lang", state.lang); } catch (e) {}
+      try {
+        localStorage.setItem("dsh-store-lang", state.lang);
+        localStorage.setItem("dsh-store-lang-manual", "1");
+      } catch (e) {}
       applyLang();
     });
   }
