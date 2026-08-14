@@ -308,6 +308,7 @@
   }
 
   function renderGrid() {
+    syncFeatured();
     const list = filtered();
     const page = list.slice(0, state.page * state.pageSize);
     const remaining = list.length - page.length;
@@ -332,6 +333,14 @@
       c.classList.add("reveal");
       setTimeout(() => c.classList.add("in"), Math.min(i % 12, 8) * 24);
     });
+  }
+
+  function syncFeatured() {
+    const el = $("#featured");
+    if (!el) return;
+    if (state.search.trim()) { el.hidden = true; return; } // hide while searching
+    const has = state.data.some((r) => r.featured);
+    el.hidden = !has;
   }
 
   function renderFeatured() {
