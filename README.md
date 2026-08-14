@@ -112,6 +112,29 @@ docker exec dsh-store nginx -t   # 容器内校验 nginx 配置
 
 手动触发：GitHub 仓库 **Actions** 页 → **Update plugin data** → **Run workflow**。
 
+### 服务器定时刷新（crontab）
+
+部署在自有服务器时，可用 crontab 定时拉取最新数据并重启服务生效（Docker Compose 部署下会自动重建镜像并重建容器）：
+
+```bash
+# 1. 服务器首次部署
+git clone https://github.com/wink-run/dsh-plugin-store.git /opt/ds-plugin-store
+cd /opt/ds-plugin-store
+cp .env.example .env                # 设置 DOMAIN
+./scripts/gen-certs.sh your.domain  # 或把正式证书放入 ./certs
+docker compose up -d --build
+
+# 2. 配置 crontab（每 3 小时，日志写入文件）
+crontab -e
+# 加入一行：
+# 0 */3 * * * /opt/ds-plugin-store/scripts/cron-refresh.sh >> /var/log/dsh-store-refresh.log 2>&1
+
+# 3. 手动跑一次验证
+/opt/ds-plugin-store/scripts/cron-refresh.sh
+```
+
+脚本行为：`git pull --ff-only origin main` 拉取最新数据 → 检测到 Docker Compose 服务则 `docker compose up -d --build` 重建镜像并重启容器，使新数据生效；无 Docker 服务时只拉取，提示自行重启（如 `node server.js`）。
+
 ### 本地重新抓取
 
 脚本在干净环境（无本地缓存）会自动走完整抓取流程，与 CI 行为一致；本地存在缓存时增量复用（可用环境变量覆盖）：
