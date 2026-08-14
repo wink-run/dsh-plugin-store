@@ -97,14 +97,14 @@ docker exec dsh-store nginx -t   # 容器内校验 nginx 配置
 | --- | --- |
 | `data/plugins.json` | 插件目录（1080 个仓库的整理结果） |
 | `scripts/build_data.py` | 数据构建脚本：抓取、分类、安装命令、README 摘要、精选标记 |
-| `.github/workflows/update-plugins.yml` | 每 6 小时自动抓取并提交新数据 |
+| `.github/workflows/update-plugins.yml` | 每 3 小时自动抓取并提交新数据 |
 | `assets/css/` `assets/js/` | 页面样式与应用脚本 |
 | `assets/fonts/` | 自托管字体（Space Grotesk + JetBrains Mono） |
 | `assets/img/` | 品牌素材：Token Bank logo（SVG）、Wink 品牌图（PNG）、DeepSeek logo |
 
 ### 自动更新（GitHub Actions）
 
-仓库已配置定时工作流，**每 6 小时**（`0 */6 * * *`，UTC）自动执行：
+仓库已配置定时工作流，**每 3 小时**（`0 */3 * * *`，UTC）自动执行：
 
 1. 通过 GitHub Search API 抓取全部 `topic:dsh-plugin` 仓库（自动分页，`GITHUB_TOKEN` 自动提供、提高速率限制）；
 2. 拉取头部 60 个插件仓库的 README，生成详情摘要；

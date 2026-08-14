@@ -1,7 +1,7 @@
 # ============================================================================
 # DSH Store · automated plugin data refresh
 #
-# Runs every 6 hours (plus on manual dispatch from the Actions tab):
+# Runs every 3 hours (plus on manual dispatch from the Actions tab):
 #   1. fetches every `dsh-plugin` topic repo from the GitHub search API
 #   2. pulls README excerpts for the top-starred plugins
 #   3. rebuilds data/plugins.json and commits/pushes it when anything changed
@@ -14,7 +14,7 @@ name: Update plugin data
 
 on:
   schedule:
-    - cron: "0 */6 * * *" # every 6 hours at minute 0 (UTC)
+    - cron: "0 */3 * * *" # every 3 hours at minute 0 (UTC)
   workflow_dispatch: # manual trigger from the Actions tab
 
 permissions:
