@@ -21,6 +21,7 @@ node server.js
 - **搜索**：按名称 / 作者 / 描述 / 标签 / 分类实时过滤，支持 `/` 快捷键聚焦搜索框
 - **排序**：推荐（Stars）、最多 Stars、最近更新、名称 A-Z
 - **精选**：按 Stars 排序的顶部插件条
+- **Wink 生态**：首页 Banner 右侧展示 Token Bank 与 Wink Pings 的 logo 与一句话介绍（使用真实品牌素材）
 - **详情弹窗**：完整简介、真实安装命令（一键复制）、Stars / Forks / 语言 / 许可 / 更新时间、标签、README 摘要
 - **深浅色主题**：默认跟随系统，可手动切换并记忆
 - **URL 路由**：`#cat=vision`、`#search=ocr`、`#p=liustack/modlens` 可分享 / 可返回
@@ -31,7 +32,9 @@ node server.js
 | --- | --- |
 | `data/plugins.json` | 插件目录（865 个仓库的整理结果） |
 | `scripts/build_data.py` | 数据构建脚本：分类、安装命令、README 摘要、精选标记 |
-| `assets/` | 自托管字体（Space Grotesk + JetBrains Mono）、CSS、JS |
+| `assets/css/` `assets/js/` | 页面样式与应用脚本 |
+| `assets/fonts/` | 自托管字体（Space Grotesk + JetBrains Mono） |
+| `assets/img/` | 品牌素材：Token Bank logo（SVG）、Wink 品牌图（PNG） |
 
 重新抓取并重建数据：
 
