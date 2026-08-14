@@ -259,6 +259,7 @@
     pageSize: 24,
     theme: "dark",
     lang: "zh",
+    generatedAt: "",
   };
 
   let featuredEl, gridEl, emptyEl, searchEl;
@@ -277,6 +278,14 @@
     if (days < 31) return tFmt("ago.weeks", { n: Math.floor(days / 7) });
     if (days < 365) return tFmt("ago.months", { n: Math.floor(days / 30) });
     return tFmt("ago.years", { n: Math.floor(days / 365) });
+  };
+
+  const fmtStamp = (iso) => {
+    if (!iso) return "-";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return String(iso).slice(0, 16) || "-";
+    const p = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
   };
 
   const starIcon = `<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M8 1.2l2 4.1 4.6.7-3.3 3.2.8 4.6L8 11.6l-4.1 2.2.8-4.6L1.4 6l4.6-.7z"/></svg>`;
@@ -313,7 +322,9 @@
     try {
       const res = await fetch("data/plugins.json", { cache: "no-store" });
       if (!res.ok) throw new Error("HTTP " + res.status);
-      state.data = await res.json();
+      const data = await res.json();
+      state.generatedAt = data.generated_at || "";
+      state.data = Array.isArray(data) ? data : (data.records || []);
     } catch (err) {
       showError("数据加载失败：" + err.message + "。请确认已用 HTTP 服务打开本页（如 python3 -m http.server）。");
       return;
@@ -330,13 +341,15 @@
     const total = state.data.length;
     const stars = state.data.reduce((s, r) => s + r.stars, 0);
     const cats = CAT_ORDER.filter((c) => c !== "all" && state.data.some((r) => r.category === c)).length;
-    const updated = state.data.reduce((m, r) => (r.updated > m ? r.updated : m), "");
+    const updated = state.generatedAt
+      ? fmtStamp(state.generatedAt)
+      : (state.data.reduce((m, r) => (r.updated > m ? r.updated : m), "") || "-");
     $("#hero-count").textContent = fmtNumber(total);
     $("#stat-plugins").textContent = fmtNumber(total);
     $("#stat-stars").textContent = fmtStars(stars) + "+";
     $("#stat-cats").textContent = String(cats);
-    $("#stat-updated").textContent = updated || "-";
-    $("#footer-updated").textContent = updated || "-";
+    $("#stat-updated").textContent = updated;
+    $("#footer-updated").textContent = updated;
   }
 
   /* ---------------- trend chart ---------------- */

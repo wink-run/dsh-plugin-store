@@ -689,8 +689,11 @@ for r in records:
     r["featured"] = r["id"] in featured
 
 out_path = os.path.join(ROOT, "data", "plugins.json")
-json.dump(records, open(out_path, "w"), ensure_ascii=False, separators=(",", ":"))
+generated_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+payload = {"generated_at": generated_at, "records": records}
+json.dump(payload, open(out_path, "w"), ensure_ascii=False, separators=(",", ":"))
 print("wrote", out_path)
+print("generated_at:", generated_at)
 print("plugins:", len(records))
 from collections import Counter
 cc = Counter(x["category"] for x in records)
