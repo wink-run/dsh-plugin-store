@@ -200,6 +200,10 @@ code {
   cursor: pointer; transition: color .15s, border-color .15s, background .15s;
 }
 .icon-btn:hover { color: var(--text-1); border-color: var(--border-strong); background: var(--accent-soft-2); }
+.lang-btn {
+  width: auto; min-width: 36px; padding: 0 9px;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .02em;
+}
 [data-theme="dark"] .ic-sun { display: none; }
 [data-theme="light"] .ic-moon { display: none; }
 

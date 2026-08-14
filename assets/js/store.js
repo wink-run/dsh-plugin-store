@@ -28,6 +28,220 @@
   };
   const CAT_ORDER = ["ui","agent","vision","tools","search","memory","integration","dev","skill","desktop","fun","platform","docs","misc"];
 
+  /* ---------------- i18n ---------------- */
+  const GITHUB_TOPIC_LINK = '<a href="https://github.com/topics/dsh-plugin" target="_blank" rel="noopener">GitHub <code>dsh-plugin</code></a>';
+  const AWESOME_LINK = '<a href="https://github.com/awesome-dsh-plugin/awesome-dsh-plugin" target="_blank" rel="noopener">awesome-dsh-plugin</a>';
+  const I18N = {
+    zh: {
+      "title": "DSH 插件商店 · DeepSeek Harness Plugin Store",
+      "metaDesc": "从 GitHub 社区抓取的 DeepSeek Harness (DSH) 插件目录：按类别浏览、搜索，一键复制安装命令。",
+      "brand.tag": "插件商店",
+      "nav.all": "全部插件",
+      "nav.cat": "分类浏览",
+      "nav.featured": "精选",
+      "nav.about": "关于",
+      "skip.link": "跳到插件列表",
+      "lang.toggle.aria": "切换到英文",
+      "theme.toggle.aria": "切换深浅色主题",
+      "github.aria": "GitHub dsh-plugin 主题",
+      "hero.accent": "插件商店",
+      "hero.sub1": "从 GitHub 社区抓取的",
+      "hero.sub2": "个 DSH 插件：按类别浏览、搜索、一键复制安装命令。",
+      "search.placeholder": "搜索插件，例如 vision、TUI、memory、workflow…",
+      "search.aria": "搜索插件",
+      "stat.plugins": "插件总数",
+      "stat.stars": "社区 Stars",
+      "stat.cats": "分类",
+      "stat.updated": "数据更新",
+      "trend.label": "数据趋势",
+      "trend.aria": "插件总数与社区 Stars 走势图",
+      "trend.plugins": "插件总数",
+      "trend.stars": "社区 Stars",
+      "sidebar.cats": "分类",
+      "sidebar.sort": "排序",
+      "sort.aria": "排序方式",
+      "sort.recommended": "推荐",
+      "sort.stars": "最多 Stars",
+      "sort.updated": "最近更新",
+      "sort.name": "名称 A-Z",
+      "sidebar.note": `数据来自 ${GITHUB_TOPIC_LINK} 话题，由本页脚本抓取整理。安装插件即运行第三方代码，请先审阅源码。`,
+      "featured.title": "精选插件",
+      "featured.note": "按社区 Stars 排序",
+      "result.unit": "个插件",
+      "empty.title": "没有找到匹配的插件",
+      "empty.desc": "换个关键词试试，或清空筛选条件浏览全部插件。",
+      "empty.reset": "清空筛选",
+      "load.more": "加载更多",
+      "wink.title": "更多 Wink 工具",
+      "wink.tokenbank.desc": "deepseek-harness 好管家：管理模型、skill 等，还可纳管 Claude / Cursor / Codex，闲置算力换积分",
+      "wink.pings.desc": "第一手 AI 领域资讯，自定义频道精准推送个性化价值信息",
+      "wink.desktop.name": "DeepSeek-Harness 桌面版",
+      "wink.desktop.desc": "免部署，一键开启 deepseek-harness",
+      "about.title": "关于这个商店",
+      "about.source.title": "数据来源",
+      "about.source.body": `目录来自 <a href="https://github.com/topics/dsh-plugin" target="_blank" rel="noopener">GitHub 话题 <code>dsh-plugin</code></a>：每小时用 GitHub Search API 抓取全部打上该话题的公开仓库，并整理出类别、简介与安装命令。`,
+      "about.install.title": "安装方式",
+      "about.install.body": "每个插件的详情页都带一条可直接执行的命令（<code>dsh plugin --profile web add …</code> 或 npm 包），复制到终端即可。没有 DeepSeek Harness？先 <code>npm install -g @deepseek-ai/dsh</code>。",
+      "about.security.title": "安全提示",
+      "about.security.body": "本商店只做索引与发现，不托管也不审查插件代码。安装第三方插件会运行其源码，请先阅读仓库、检查许可证，并在隔离环境中试用。",
+      "about.eco.title": "加入生态",
+      "about.eco.body": `你的插件也想被收录？给仓库打上 <code>dsh-plugin</code> 话题即可，下次抓取自动出现。也可以提交到社区精选列表 ${AWESOME_LINK}。`,
+      "footer.note": "一个社区项目，与 DeepSeek 官方无隶属关系。数据抓取自 GitHub，内容版权归各仓库作者所有。",
+      "footer.updated1": "数据抓取于",
+      "footer.updated2": " · GitHub topic dsh-plugin",
+      "noscript": "此页面需要启用 JavaScript 才能加载插件目录。数据文件见 <code>data/plugins.json</code>。",
+      "modal.install": "安装",
+      "modal.copy": "复制",
+      "modal.copied": "已复制",
+      "modal.lang": "语言",
+      "modal.license": "许可",
+      "modal.created": "创建",
+      "modal.updated": "更新",
+      "modal.category": "分类",
+      "modal.source": "源码",
+      "modal.tags": "标签",
+      "modal.readme": "README 摘要",
+      "modal.openGitHub": "在 GitHub 打开",
+      "modal.homepage": "项目主页",
+      "card.view": "查看 {name} 详情",
+      "card.install": "安装",
+      "card.noDesc": "暂无简介",
+      "card.updatedTitle": "最近更新 {date}",
+      "meta.none": "无",
+      "meta.unspecified": "未声明",
+      "toast.copied": "已复制安装命令",
+      "toast.copyFailed": "复制失败，请手动选择复制",
+      "ago.unknown": "未知",
+      "ago.today": "今天",
+      "ago.days": "{n} 天前",
+      "ago.weeks": "{n} 周前",
+      "ago.months": "{n} 个月前",
+      "ago.years": "{n} 年前",
+    },
+    en: {
+      "title": "DeepSeek Harness Plugin Store",
+      "metaDesc": "A directory of DeepSeek Harness (DSH) plugins fetched from the GitHub community: browse by category, search, and install with one command.",
+      "brand.tag": "Plugin Store",
+      "nav.all": "All",
+      "nav.cat": "Browse",
+      "nav.featured": "Featured",
+      "nav.about": "About",
+      "skip.link": "Skip to plugin list",
+      "lang.toggle.aria": "Switch to Chinese",
+      "theme.toggle.aria": "Toggle light / dark theme",
+      "github.aria": "GitHub dsh-plugin topic",
+      "hero.accent": "Plugin Store",
+      "hero.sub1": "Browse and search",
+      "hero.sub2": "DSH plugins fetched from the GitHub community — organized by category, install with one command.",
+      "search.placeholder": "Search plugins, e.g. vision, TUI, memory, workflow…",
+      "search.aria": "Search plugins",
+      "stat.plugins": "Plugins",
+      "stat.stars": "Community Stars",
+      "stat.cats": "Categories",
+      "stat.updated": "Updated",
+      "trend.label": "Trends",
+      "trend.aria": "Plugin count and community stars over time",
+      "trend.plugins": "Plugins",
+      "trend.stars": "Community Stars",
+      "sidebar.cats": "Categories",
+      "sidebar.sort": "Sort",
+      "sort.aria": "Sort by",
+      "sort.recommended": "Recommended",
+      "sort.stars": "Most stars",
+      "sort.updated": "Recently updated",
+      "sort.name": "Name A-Z",
+      "sidebar.note": `Listings come from the ${GITHUB_TOPIC_LINK} topic, fetched by this page's script. Installing a plugin runs third-party code — review the source first.`,
+      "featured.title": "Featured",
+      "featured.note": "sorted by community stars",
+      "result.unit": "plugins",
+      "empty.title": "No matching plugins",
+      "empty.desc": "Try another keyword, or clear the filters to browse all plugins.",
+      "empty.reset": "Clear filters",
+      "load.more": "Load more",
+      "wink.title": "More Wink Tools",
+      "wink.tokenbank.desc": "A butler for deepseek-harness: manage models, skills and more, onboard Claude / Cursor / Codex, and earn credits with idle compute",
+      "wink.pings.desc": "First-hand AI news with custom channels that push personalized, high-value information",
+      "wink.desktop.name": "DeepSeek-Harness Desktop",
+      "wink.desktop.desc": "No setup — launch deepseek-harness in one click",
+      "about.title": "About this store",
+      "about.source.title": "Data source",
+      "about.source.body": `Listings come from the <a href="https://github.com/topics/dsh-plugin" target="_blank" rel="noopener">GitHub topic <code>dsh-plugin</code></a>: every hour we fetch every public repo tagged with the topic through the GitHub Search API, then organize categories, summaries and install commands.`,
+      "about.install.title": "Installation",
+      "about.install.body": "Every plugin detail page has a ready-to-run command (<code>dsh plugin --profile web add …</code> or an npm package) — copy and paste it into your terminal. No DeepSeek Harness yet? Start with <code>npm install -g @deepseek-ai/dsh</code>.",
+      "about.security.title": "Security note",
+      "about.security.body": "This store only indexes and discovers plugins; it does not host or review their code. Installing a third-party plugin runs its source, so read the repo, check the license and try it in an isolated environment first.",
+      "about.eco.title": "Join the ecosystem",
+      "about.eco.body": `Want your plugin listed too? Tag your repo with the <code>dsh-plugin</code> topic and it will appear on the next fetch. You can also submit it to the community picks list ${AWESOME_LINK}.`,
+      "footer.note": "A community project, not affiliated with DeepSeek. Data is fetched from GitHub; all content belongs to its original authors.",
+      "footer.updated1": "Data fetched",
+      "footer.updated2": " · GitHub topic dsh-plugin",
+      "noscript": "This page needs JavaScript to load the plugin directory. Data lives in <code>data/plugins.json</code>.",
+      "modal.install": "Install",
+      "modal.copy": "Copy",
+      "modal.copied": "Copied",
+      "modal.lang": "Language",
+      "modal.license": "License",
+      "modal.created": "Created",
+      "modal.updated": "Updated",
+      "modal.category": "Category",
+      "modal.source": "Source",
+      "modal.tags": "Tags",
+      "modal.readme": "README summary",
+      "modal.openGitHub": "Open on GitHub",
+      "modal.homepage": "Homepage",
+      "card.view": "View {name} details",
+      "card.install": "Install",
+      "card.noDesc": "No description",
+      "card.updatedTitle": "Updated {date}",
+      "meta.none": "None",
+      "meta.unspecified": "Unspecified",
+      "toast.copied": "Install command copied",
+      "toast.copyFailed": "Copy failed — select and copy manually",
+      "ago.unknown": "Unknown",
+      "ago.today": "today",
+      "ago.days": "{n}d ago",
+      "ago.weeks": "{n}w ago",
+      "ago.months": "{n}mo ago",
+      "ago.years": "{n}y ago",
+    },
+  };
+
+  const t = (k) => (I18N[state.lang] && I18N[state.lang][k]) || I18N.zh[k] || k;
+  const catName = (id) => { const c = CATS[id] || CATS.misc; return state.lang === "zh" ? c.zh : c.en; };
+  const tFmt = (k, vars) => { let s = t(k); Object.keys(vars || {}).forEach((kk) => { s = s.replace("{" + kk + "}", vars[kk]); }); return s; };
+
+  function initLang() {
+    let saved;
+    try { saved = localStorage.getItem("dsh-store-lang"); } catch (e) {}
+    const nav = (navigator.language || "zh").toLowerCase();
+    state.lang = saved === "zh" || saved === "en" ? saved : (nav.startsWith("zh") ? "zh" : "en");
+    applyLang();
+    $("#lang-toggle").addEventListener("click", () => {
+      state.lang = state.lang === "zh" ? "en" : "zh";
+      try { localStorage.setItem("dsh-store-lang", state.lang); } catch (e) {}
+      applyLang();
+    });
+  }
+
+  function applyLang() {
+    const d = I18N[state.lang];
+    document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
+    document.title = d.title || document.title;
+    const md = document.querySelector('meta[name="description"]');
+    if (md && d.metaDesc) md.setAttribute("content", d.metaDesc);
+    $$("[data-i18n]").forEach((el) => { el.textContent = d[el.dataset.i18n] || ""; });
+    $$("[data-i18n-html]").forEach((el) => { el.innerHTML = d[el.dataset.i18nHtml] || ""; });
+    $$("[data-i18n-ph]").forEach((el) => { el.setAttribute("placeholder", d[el.dataset.i18nPh] || ""); });
+    $$("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", d[el.dataset.i18nAria] || ""); });
+    const langBtn = $("#lang-toggle");
+    if (langBtn) { langBtn.textContent = state.lang === "zh" ? "EN" : "中"; }
+    renderStats();
+    renderSidebar();
+    renderFeatured();
+    renderGrid();
+    renderTrend();
+  }
+
   const state = {
     data: [],
     cat: "all",
@@ -36,6 +250,7 @@
     page: 1,
     pageSize: 24,
     theme: "dark",
+    lang: "zh",
   };
 
   let featuredEl, gridEl, emptyEl, searchEl;
@@ -47,13 +262,13 @@
 
   const timeAgo = (iso) => {
     const then = new Date(iso + "T00:00:00Z").getTime();
-    if (Number.isNaN(then)) return iso || "未知";
+    if (Number.isNaN(then)) return iso || t("ago.unknown");
     const days = Math.floor((Date.now() - then) / 86400000);
-    if (days < 1) return "今天";
-    if (days < 7) return days + " 天前";
-    if (days < 31) return Math.floor(days / 7) + " 周前";
-    if (days < 365) return Math.floor(days / 30) + " 个月前";
-    return Math.floor(days / 365) + " 年前";
+    if (days < 1) return t("ago.today");
+    if (days < 7) return tFmt("ago.days", { n: days });
+    if (days < 31) return tFmt("ago.weeks", { n: Math.floor(days / 7) });
+    if (days < 365) return tFmt("ago.months", { n: Math.floor(days / 30) });
+    return tFmt("ago.years", { n: Math.floor(days / 365) });
   };
 
   const starIcon = `<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M8 1.2l2 4.1 4.6.7-3.3 3.2.8 4.6L8 11.6l-4.1 2.2.8-4.6L1.4 6l4.6-.7z"/></svg>`;
@@ -113,7 +328,7 @@
     $("#stat-stars").textContent = fmtStars(stars) + "+";
     $("#stat-cats").textContent = String(cats);
     $("#stat-updated").textContent = updated || "-";
-    $("#footer-updated").textContent = "数据抓取于 " + (updated || "-") + " · GitHub topic dsh-plugin";
+    $("#footer-updated").textContent = updated || "-";
   }
 
   /* ---------------- trend chart ---------------- */
@@ -229,7 +444,7 @@
       tip.style.top = "10px";
       tip.innerHTML =
         `<div class="tip-date">${pts[i].date}</div>` +
-        `<div class="tip-row"><i class="tip-dot tip-plugins"></i>插件 ${fmtNumber(pts[i].plugins)}</div>` +
+        `<div class="tip-row"><i class="tip-dot tip-plugins"></i>${t("trend.plugins")} ${fmtNumber(pts[i].plugins)}</div>` +
         `<div class="tip-row"><i class="tip-dot tip-stars"></i>Stars ${fmtNumber(pts[i].stars)}</div>`;
     };
     svg.addEventListener("mousemove", move);
@@ -247,12 +462,12 @@
     state.data.forEach((r) => { counts[r.category] = (counts[r.category] || 0) + 1; });
     const list = $("#cat-list");
     const items = [
-      { id: "all", zh: "全部插件", en: "All" },
-      ...CAT_ORDER.map((c) => ({ id: c, zh: CATS[c].zh, en: CATS[c].en })),
+      { id: "all" },
+      ...CAT_ORDER.map((c) => ({ id: c })),
     ].map((c) => {
       const n = c.id === "all" ? state.data.length : (counts[c.id] || 0);
       return `<li><button class="cat-link ${state.cat === c.id ? "active" : ""}" data-cat="${c.id}" type="button">
-        <span><svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${CAT_ICONS[c.id] || CAT_ICONS.misc}</svg> ${c.zh}</span>
+        <span><svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${CAT_ICONS[c.id] || CAT_ICONS.misc}</svg> ${catName(c.id)}</span>
         <span class="cat-count">${n}</span>
       </button></li>`;
     }).join("");
@@ -272,7 +487,7 @@
     const q = state.search.trim().toLowerCase();
     if (q) {
       list = list.filter((r) =>
-        (r.name + " " + r.owner + " " + r.full_name + " " + (r.description || "") + " " + (r.topics || []).join(" ") + " " + (CATS[r.category] ? CATS[r.category].zh : "")).toLowerCase().includes(q)
+        (r.name + " " + r.owner + " " + r.full_name + " " + (r.description || "") + " " + (r.topics || []).join(" ") + " " + catName(r.category) + " " + CATS[r.category].zh + " " + CATS[r.category].en).toLowerCase().includes(q)
       );
     }
     const s = state.sort;
@@ -287,8 +502,8 @@
   function cardHTML(r) {
     const cat = CATS[r.category] || CATS.misc;
     return `
-      <button class="card" data-id="${esc(r.id)}" type="button" aria-label="查看 ${esc(r.name)} 详情">
-        <span class="card-install">${copyIcon} 安装</span>
+      <button class="card" data-id="${esc(r.id)}" type="button" aria-label="${tFmt("card.view", { name: esc(r.name) })}">
+        <span class="card-install">${copyIcon} ${t("card.install")}</span>
         <span class="card-top">
           <img class="avatar" src="${esc(r.avatar)}" alt="" width="40" height="40" loading="lazy">
           <span class="card-name-wrap">
@@ -296,13 +511,13 @@
             <span class="card-owner">${esc(r.owner)} / ${esc(r.name)}</span>
           </span>
         </span>
-        <span class="card-desc">${esc(r.description || "暂无简介")}</span>
+        <span class="card-desc">${esc(r.description || t("card.noDesc"))}</span>
         <span class="card-foot">
-          <span class="tag">${esc(cat.zh)}</span>
+          <span class="tag">${esc(catName(r.category))}</span>
           <span class="stars" title="${fmtNumber(r.stars)} stars">${starIcon} ${fmtStars(r.stars)}</span>
           ${r.language ? `<span class="lang"><span class="lang-dot" style="background:${langColor(r.language)}"></span>${esc(r.language)}</span>` : ""}
           <span class="spacer"></span>
-          <span class="time" title="最近更新 ${esc(r.updated || "")}">${timeAgo(r.updated)}</span>
+          <span class="time" title="${tFmt("card.updatedTitle", { date: esc(r.updated || "") })}">${timeAgo(r.updated)}</span>
         </span>
       </button>`;
   }
@@ -317,7 +532,7 @@
     const rf = $("#result-filter");
     if (state.cat !== "all") {
       rf.hidden = false;
-      rf.textContent = " · " + CATS[state.cat].zh;
+      rf.textContent = " · " + catName(state.cat);
     } else rf.hidden = true;
 
     gridEl.innerHTML = page.map(cardHTML).join("");
@@ -351,7 +566,7 @@
     $("#featured-row").innerHTML = feats.map((r, i) => {
       const cat = CATS[r.category] || CATS.misc;
       return `
-        <button class="featured-card" data-id="${esc(r.id)}" type="button" aria-label="查看 ${esc(r.name)} 详情">
+        <button class="featured-card" data-id="${esc(r.id)}" type="button" aria-label="${tFmt("card.view", { name: esc(r.name) })}">
           <span class="fc-top">
             <span class="fc-rank">TOP ${i + 1}</span>
             <img class="avatar" src="${esc(r.avatar)}" alt="" width="34" height="34" loading="lazy">
@@ -359,7 +574,7 @@
           </span>
           <span class="fc-desc">${esc(r.description || "")}</span>
           <span class="fc-meta">
-            <span class="tag">${esc(cat.zh)}</span>
+            <span class="tag">${esc(catName(r.category))}</span>
             <span class="stars">${starIcon} ${fmtStars(r.stars)}</span>
             <span>${esc(r.language || "")}</span>
           </span>
@@ -381,15 +596,15 @@
           <h2 id="modal-title">${esc(r.name)}</h2>
           <p class="owner"><a href="https://github.com/${esc(r.owner)}" target="_blank" rel="noopener">@${esc(r.owner)}</a> · ${esc(r.full_name)}</p>
         </div>
-        <span class="tag" style="margin-left:auto; margin-top:6px">${esc(cat.zh)}</span>
+        <span class="tag" style="margin-left:auto; margin-top:6px">${esc(catName(r.category))}</span>
       </div>
-      <p class="modal-desc">${esc(r.description || "暂无简介")}</p>
+      <p class="modal-desc">${esc(r.description || t("card.noDesc"))}</p>
 
       <div class="modal-section">
-        <p class="modal-label">安装</p>
+        <p class="modal-label">${t("modal.install")}</p>
         <div class="install-box">
           <pre class="install-cmd" id="install-cmd">${esc(r.install)}</pre>
-          <button class="copy-btn" id="copy-btn" type="button">${copyIcon} 复制</button>
+          <button class="copy-btn" id="copy-btn" type="button">${copyIcon} ${t("modal.copy")}</button>
         </div>
       </div>
 
@@ -397,22 +612,22 @@
         <dl class="modal-meta">
           <div class="meta-cell"><dt>Stars</dt><dd>${fmtNumber(r.stars)}</dd></div>
           <div class="meta-cell"><dt>Forks</dt><dd>${fmtNumber(r.forks)}</dd></div>
-          <div class="meta-cell"><dt>语言</dt><dd>${esc(r.language || "无")}</dd></div>
-          <div class="meta-cell"><dt>许可</dt><dd>${esc(r.license || "未声明")}</dd></div>
-          <div class="meta-cell"><dt>创建</dt><dd>${esc(r.created || "-")}</dd></div>
-          <div class="meta-cell"><dt>更新</dt><dd>${esc(r.updated || "-")}</dd></div>
-          <div class="meta-cell"><dt>分类</dt><dd>${esc(cat.zh)}</dd></div>
-          <div class="meta-cell"><dt>源码</dt><dd><a href="${esc(r.url)}" target="_blank" rel="noopener">GitHub</a></dd></div>
+          <div class="meta-cell"><dt>${t("modal.lang")}</dt><dd>${esc(r.language || t("meta.none"))}</dd></div>
+          <div class="meta-cell"><dt>${t("modal.license")}</dt><dd>${esc(r.license || t("meta.unspecified"))}</dd></div>
+          <div class="meta-cell"><dt>${t("modal.created")}</dt><dd>${esc(r.created || "-")}</dd></div>
+          <div class="meta-cell"><dt>${t("modal.updated")}</dt><dd>${esc(r.updated || "-")}</dd></div>
+          <div class="meta-cell"><dt>${t("modal.category")}</dt><dd>${esc(catName(r.category))}</dd></div>
+          <div class="meta-cell"><dt>${t("modal.source")}</dt><dd><a href="${esc(r.url)}" target="_blank" rel="noopener">GitHub</a></dd></div>
         </dl>
       </div>
 
-      ${r.topics && r.topics.length ? `<div class="modal-section"><p class="modal-label">标签</p><div class="topic-row">${r.topics.map((t) => `<span class="topic">${esc(t)}</span>`).join("")}</div></div>` : ""}
+      ${r.topics && r.topics.length ? `<div class="modal-section"><p class="modal-label">${t("modal.tags")}</p><div class="topic-row">${r.topics.map((x) => `<span class="topic">${esc(x)}</span>`).join("")}</div></div>` : ""}
 
-      ${r.readme ? `<div class="modal-section"><p class="modal-label">README 摘要</p><pre class="readme-excerpt">${esc(r.readme)}…</pre></div>` : ""}
+      ${r.readme ? `<div class="modal-section"><p class="modal-label">${t("modal.readme")}</p><pre class="readme-excerpt">${esc(r.readme)}…</pre></div>` : ""}
 
       <div class="modal-actions">
-        <a class="btn btn-primary" href="${esc(r.url)}" target="_blank" rel="noopener">${extIcon} 在 GitHub 打开</a>
-        ${r.homepage ? `<a class="btn btn-ghost" href="${esc(r.homepage)}" target="_blank" rel="noopener">${extIcon} 项目主页</a>` : ""}
+        <a class="btn btn-primary" href="${esc(r.url)}" target="_blank" rel="noopener">${extIcon} ${t("modal.openGitHub")}</a>
+        ${r.homepage ? `<a class="btn btn-ghost" href="${esc(r.homepage)}" target="_blank" rel="noopener">${extIcon} ${t("modal.homepage")}</a>` : ""}
       </div>
     `;
 
@@ -439,9 +654,9 @@
   async function copyInstall(text, btn) {
     const done = () => {
       btn.classList.add("copied");
-      btn.innerHTML = checkIcon + " 已复制";
-      setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = copyIcon + " 复制"; }, 1600);
-      toast("已复制安装命令");
+      btn.innerHTML = checkIcon + " " + t("modal.copied");
+      setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = copyIcon + " " + t("modal.copy"); }, 1600);
+      toast(t("toast.copied"));
     };
     try {
       await navigator.clipboard.writeText(text);
@@ -450,7 +665,7 @@
       const ta = document.createElement("textarea");
       ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
       document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); done(); } catch (e2) { toast("复制失败，请手动选择复制"); }
+      try { document.execCommand("copy"); done(); } catch (e2) { toast(t("toast.copyFailed")); }
       ta.remove();
     }
   }
@@ -578,6 +793,7 @@
     gridEl = $("#grid");
     emptyEl = $("#empty");
     initTheme();
+    initLang();
     bindEvents();
     window.addEventListener("resize", () => {
       clearTimeout(trendTimer);
