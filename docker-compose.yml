@@ -1,0 +1,53 @@
+# ============================================================================
+# DSH Store · Docker Compose deployment
+#
+#   cp .env.example .env          # set DOMAIN
+#   ./scripts/gen-certs.sh        # dev: self-signed certs into ./certs
+#   docker compose up -d --build
+#
+# nginx serves the static site over HTTPS (ports 80/443) and forwards all
+# HTTP traffic to HTTPS. TLS certificates are mounted read-only from ./certs
+# (default paths fullchain.pem / privkey.pem, overridable via SSL_CERT/SSL_KEY).
+# ============================================================================
+
+services:
+  store:
+    build: .
+    image: dsh-store:latest
+    container_name: dsh-store
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # server_name + certificate CN; used by the nginx config template
+      DOMAIN: ${DOMAIN:-localhost}
+      SSL_CERT: ${SSL_CERT:-/etc/nginx/certs/fullchain.pem}
+      SSL_KEY: ${SSL_KEY:-/etc/nginx/certs/privkey.pem}
+    volumes:
+      # TLS certificates (fullchain.pem + privkey.pem), read-only.
+      # For Let's Encrypt: run certbot on the host with --webroot pointing at
+      # ./certs, or use `certbot certonly --standalone` and copy the files in.
+      - ./certs:/etc/nginx/certs:ro
+    # Optional: join an existing backend network so the commented
+    # reverse-proxy locations in the nginx template can reach other services.
+    # networks:
+    #   default:
+    #   backend:
+    #     external: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+# Optional backend service the nginx reverse proxy can forward to.
+# Uncomment, add a matching "location /api/" block in the nginx template,
+# rebuild, and it will be reachable at https://<DOMAIN>/api/.
+#
+#   backend:
+#     image: your-backend:latest
+#     restart: unless-stopped
+#     expose:
+#       - "8080"

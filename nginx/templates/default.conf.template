@@ -1,0 +1,111 @@
+# ============================================================================
+# DSH Store · nginx server config (template)
+#
+# The official nginx image runs envsubst over /etc/nginx/templates/*.template
+# at container start and writes the result to /etc/nginx/conf.d/. Only
+# variables present in the container environment are substituted, so nginx
+# runtime variables like $host / $uri / $request_uri stay untouched.
+#
+# Substitute with env (see docker-compose.yml):
+#   ${DOMAIN}    server_name / certificate CN, e.g. store.example.com
+#   ${SSL_CERT}  path to the TLS certificate chain  (PEM)
+#   ${SSL_KEY}   path to the TLS private key        (PEM)
+#
+# Reverse proxy: uncomment the "location /api/" block below (and the matching
+# lines in the HTTP server if you proxy over plain HTTP internally) to forward
+# requests to a backend container. Requires adding the service to
+# docker-compose.yml and enabling it in the same Docker network.
+# ============================================================================
+
+# ---- HTTP : forward everything to HTTPS, except the health check ----------
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN} _;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    # Optional: proxy some paths over plain HTTP before the HTTPS redirect
+    # location /api/ {
+    #     proxy_pass http://backend:8080/;
+    #     proxy_set_header Host $host;
+    #     proxy_set_header X-Real-IP $remote_addr;
+    #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    #     proxy_set_header X-Forwarded-Proto $scheme;
+    # }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ---- HTTPS : serve the static store + optional reverse proxy --------------
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+
+    server_name ${DOMAIN} _;
+
+    # TLS certificates (mounted volume, see docker-compose.yml)
+    ssl_certificate     ${SSL_CERT};
+    ssl_certificate_key ${SSL_KEY};
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    # Security headers
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    # Uncomment once your domain is final (HSTS, 6 months):
+    # add_header Strict-Transport-Security "max-age=15768000; includeSubDomains" always;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Compression for text-like assets
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml application/xml;
+
+    # Fonts: immutable (content is fixed per deploy)
+    location ~* \.(woff2?|ttf)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Build-less CSS/JS/images: short cache so deploys are picked up quickly
+    location ~* \.(css|js|png|svg)$ {
+        expires 1h;
+        add_header Cache-Control "public, max-age=3600";
+    }
+
+    # Plugin directory data: always fresh (rebuilt on every scrape)
+    location = /data/plugins.json {
+        add_header Cache-Control "no-store";
+    }
+
+    # Optional reverse proxy to an application backend (HTTPS server block)
+    # location /api/ {
+    #     proxy_pass http://backend:8080/;
+    #     proxy_set_header Host $host;
+    #     proxy_set_header X-Real-IP $remote_addr;
+    #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    #     proxy_set_header X-Forwarded-Proto $scheme;
+    #     proxy_read_timeout 60s;
+    # }
+
+    # SPA fallback
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
