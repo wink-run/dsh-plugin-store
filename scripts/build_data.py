@@ -606,7 +606,10 @@ for r in repos:
         "topics": (r.get("topics") or [])[:6],
         "install": inst,
         "created": r.get("created_at", "")[:10],
-        "updated": r.get("updated_at", "")[:10],
+        # 用最后一次 git push 时间，而不是 GitHub 的 updated_at。
+        # updated_at 会因 star / topic 等元数据变动刷新，抓取后几乎所有仓库挤在同一天，
+        # 「最近更新」排序就会退化成和「最多星」一样。
+        "updated": (r.get("pushed_at") or r.get("updated_at") or "")[:10],
         "url": r.get("html_url", f"https://github.com/{fn}"),
         "homepage": r.get("homepage"),
         "license": (r.get("license") or {}).get("spdx_id") if r.get("license") else None,

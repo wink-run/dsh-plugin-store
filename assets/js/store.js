@@ -506,6 +506,25 @@
   }
 
   /* ---------------- filtering / sorting ---------------- */
+  /** 距今天数；缺日期时视为很久以前，便于热度衰减 */
+  function daysSince(iso) {
+    if (!iso) return 1e9;
+    const stamp = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso + "T00:00:00Z" : iso;
+    const then = Date.parse(stamp);
+    if (Number.isNaN(then)) return 1e9;
+    return Math.max(0, (Date.now() - then) / 86400000);
+  }
+
+  /** 推荐分：star 增速 + 更新新鲜度，精选略加权（与「最多星」「最近更新」区分开） */
+  function recommendedScore(r) {
+    const stars = Number(r.stars) || 0;
+    const ageDays = Math.max(daysSince(r.created), 1);
+    const recencyDays = daysSince(r.updated);
+    const velocity = Math.log10(stars + 1) / Math.pow(ageDays + 14, 0.4);
+    const freshness = 1 / Math.pow(recencyDays + 2, 1.15);
+    return (r.featured ? 2 : 0) + velocity * 3 + freshness;
+  }
+
   function filtered() {
     let list = state.data;
     if (state.cat !== "all") list = list.filter((r) => r.category === state.cat);
@@ -516,10 +535,16 @@
       );
     }
     const s = state.sort;
-    if (s === "stars") list = list.slice().sort((a, b) => b.stars - a.stars);
-    else if (s === "updated") list = list.slice().sort((a, b) => (b.updated || "").localeCompare(a.updated || ""));
-    else if (s === "name") list = list.slice().sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-    else list = list.slice().sort((a, b) => (b.stars - a.stars) || (b.featured ? 1 : 0));
+    const byName = (a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    if (s === "stars") {
+      list = list.slice().sort((a, b) => (b.stars - a.stars) || byName(a, b));
+    } else if (s === "updated") {
+      list = list.slice().sort((a, b) => (b.updated || "").localeCompare(a.updated || "") || (b.stars - a.stars) || byName(a, b));
+    } else if (s === "name") {
+      list = list.slice().sort(byName);
+    } else {
+      list = list.slice().sort((a, b) => recommendedScore(b) - recommendedScore(a) || byName(a, b));
+    }
     return list;
   }
 
